@@ -1,38 +1,18 @@
+import os
+
+os.system("sudo pip3 install torch")
+os.system("sudo pip3 install torchvision")
+
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import torchvision
+
 from torch.utils.data import DataLoader
- 
-transform=torchvision.transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
-train_dataset=torchvision.datasets.CIFAR10('data/',train=True,transform=transform,download=True)
-test_dataset=torchvision.datasets.CIFAR10('data/',train=False,transform=transform,download=True)
- 
-# length 长度
-print('训练数据集长度: {}'.format(len(train_dataset)))
-print('测试数据集长度: {}'.format(len(test_dataset)))
-# DataLoader创建数据集
-train_dataloader=DataLoader(train_dataset,batch_size=84,shuffle=True)
-test_dataloader=DataLoader(test_dataset,batch_size=84,shuffle=True)
- 
-examples=enumerate(test_dataloader)#组合成一个索引序列
-batch_idx,(example_data,example_targets)=next(examples)
-classes=('airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck')
-fig=plt.figure()
-for i in range(6):
-    plt.subplot(2,3,i+1)
-    #plt.tight_layout()
-    img= example_data[i]
-    print(img.shape)
-    img = img.swapaxes(0, 1)
-    img = img.swapaxes(1, 2)
-    #img = img[:,:,::-1]
-    plt.imshow(img,interpolation='none')
-    plt.title('target: {}'.format(example_targets[i]))
-    plt.xticks([])
-    plt.yticks([])
-plt.show()
+    
+
 class NeuralNetwork(nn.Module):
-    def __init__(self):
+def __init__(self):
         super(NeuralNetwork,self).__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(in_channels=3,out_channels=128,kernel_size=(3,3),stride=1,padding=1),nn.ReLU(),nn.MaxPool2d(kernel_size=(3,3),stride=2),
@@ -55,82 +35,21 @@ class NeuralNetwork(nn.Module):
         x = self.layer1(x)
         x = self.layer2(x)
         return x
- 
-net = NeuralNetwork()
-device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-net.to(device)
-print("参数数：{}".format(sum(x.numel() for x in net.parameters())))
- 
-# 损失函数与优化器
-loss=nn.CrossEntropyLoss()
-optimizer=optim.SGD(net.parameters(),lr=0.05)
- 
-# 记录训练的次数
-total_train_step = 0
-#记录测试的次数
-total_test_step = 0
- 
-# 添加tensorboard
-writer=SummaryWriter("./logs_train")
- 
-for epoch in range(25):
- 
-    print("——————第 {} 轮训练开始——————".format(epoch+1))
- 
-    #训练开始
-    net.train()
- 
-    for imgs,targets in train_dataloader:
-        imgs = imgs.to(device)
-        targets = targets.to(device)
-        output=net(imgs)
- 
-        Loss=loss(output,targets)
-        # 优化器优化模型
-        optimizer.zero_grad()
-        Loss.backward()
-        optimizer.step()
- 
-        _, pred = output.max(1)
-        num_correct = (pred == targets).sum().item()
-        acc = num_correct / (64)
-        total_train_step = total_train_step + 1
-        if total_train_step%100 == 0:
-            print("训练次数：{}, Loss: {}".format(total_train_step,Loss.item()))
-            writer.add_scalar("train_loss", Loss.item(), total_train_step)
-            writer.add_scalar("train_acc", acc, total_train_step)
- 
- 
- 
-    # 测试步骤开始
-    net.eval()
-    eval_loss = 0
-    eval_losses = 0
-    eval_acc = 0
-    eval_acces = 0
-    with torch.no_grad():
-        for imgs,targets in test_dataloader:
-            imgs=imgs.to(device)
-            targets=targets.to(device)
-            output=net(imgs)
-            Loss=loss(output,targets)
-            _, pred = output.max(1)
-            num_correct = (pred == targets).sum().item()
-            eval_loss += Loss
-            acc = num_correct / imgs.shape[0]
-            eval_acc += acc
- 
-        eval_losses = eval_loss/(len(test_dataloader))
-        eval_acces = eval_acc/(len(test_dataloader))
-        print("整体测试集上的Loss: {}".format(eval_losses))
-        print("整体测试集上的正确率: {}".format(eval_acces))
-        writer.add_scalar("test_loss", eval_losses, total_test_step)
-        writer.add_scalar("test_accuracy", eval_acces, total_test_step)
-        total_test_step = total_test_step + 1
- 
-        torch.save(net, "tudui_{}.pth".format(epoch))
-        print("模型已保存")
- 
-writer.close()
- 
+
+def read_data():
+    # 这里可自行修改数据预处理，batch大小也可自行调整
+    # 保持本地训练的数据读取和这里一致
+    dataset_train = torchvision.datasets.CIFAR10(root='data/exp03', train=True, download=True, transform=torchvision.transforms.ToTensor())
+    dataset_val = torchvision.datasets.CIFAR10(root='data/exp03', train=False, download=False, transform=torchvision.transforms.ToTensor())
+    data_loader_train = DataLoader(dataset=dataset_train, batch_size=84, shuffle=True)
+    data_loader_val = DataLoader(dataset=dataset_val, batch_size=84, shuffle=False)
+    return dataset_train, dataset_val, data_loader_train, data_loader_val
+
+def main():
+    model = NeuralNetwork() # 若有参数则传入参数
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)
+    model.load_state_dict(torch.load(parent_dir + '/pth/model.pth'))
+    return model
+    
  
