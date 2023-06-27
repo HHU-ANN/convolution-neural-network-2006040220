@@ -90,7 +90,7 @@ def read_data():
     return dataset_train, dataset_val, data_loader_train, data_loader_val
 
 def main():
-    model = ResNet(ResidualBlock, [2, 2, 2]).to(device)
+    model = ResNet(ResidualBlock, [2, 2, 2])
     current_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(current_dir)
     model.load_state_dict(torch.load(parent_dir + '/pth/model.pth'))
