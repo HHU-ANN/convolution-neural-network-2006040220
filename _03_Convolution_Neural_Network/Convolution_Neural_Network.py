@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 
 class NeuralNetwork(nn.Module):
     def __init__(self):
-        super(MyAlexNet,self).__init__()
+        super(NeuralNetwork,self).__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(in_channels=3,out_channels=96,kernel_size=(3,3),stride=1,padding=1),nn.ReLU(),nn.MaxPool2d(kernel_size=(3,3),stride=2),
             nn.Conv2d(in_channels=96,out_channels=256,kernel_size=(5,5),stride=1,padding=2),nn.ReLU(),nn.MaxPool2d(kernel_size=(3,3),stride=2),
