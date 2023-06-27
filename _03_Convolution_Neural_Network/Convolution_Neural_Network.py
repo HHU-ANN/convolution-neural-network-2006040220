@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
     
 
 class NeuralNetwork(nn.Module):
-def __init__(self):
+    def __init__(self):
         super(NeuralNetwork,self).__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(in_channels=3,out_channels=128,kernel_size=(3,3),stride=1,padding=1),nn.ReLU(),nn.MaxPool2d(kernel_size=(3,3),stride=2),
