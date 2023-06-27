@@ -1,11 +1,7 @@
 import torch
-from torch import nn, optim
+import torch.nn as nn
 import torchvision
-import torch.nn.functional as F
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from matplotlib import  pyplot as plt
-from torch.utils.tensorboard import SummaryWriter
  
 transform=torchvision.transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])
 train_dataset=torchvision.datasets.CIFAR10('data/',train=True,transform=transform,download=True)
